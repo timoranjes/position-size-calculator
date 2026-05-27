@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Position Size Calculator & Risk Dashboard — Free Trading Tool</title>
+<meta name="description" content="Free position size calculator and portfolio risk dashboard for stocks, forex, and crypto. Calculate optimal position size, manage risk, and visualize portfolio exposure.">
+<meta name="keywords" content="position size calculator, risk management, portfolio risk, trading tool, stock trading, forex, crypto">
+<style>
+  :root {
+    --navy: #1a1f36;
+    --navy-light: #252b45;
+    --navy-mid: #2d3352;
+    --gold: #c9a84c;
+    --gold-light: #e0c36a;
+    --gold-dim: rgba(201, 168, 76, 0.15);
+    --green: #2ecc71;
+    --red: #e74c3c;
+    --orange: #f39c12;
+    --blue: #3498db;
+    --white: #ecf0f1;
+    --gray: #95a5a6;
+    --gray-light: #bdc3c7;
+    --card-radius: 12px;
+    --shadow: 0 4px 24px rgba(0,0,0,0.3);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--navy);
+    color: var(--white);
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+  .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+
+  /* Header */
+  header {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
+    border-bottom: 2px solid var(--gold);
+    padding: 20px 0;
+  }
+  .header-inner { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+  .logo { display: flex; align-items: center; gap: 10px; }
+  .logo-icon { width: 36px; height: 36px; background: var(--gold); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; color: var(--navy); }
+  .logo-text { font-size: 22px; font-weight: 700; color: var(--white); }
+  .logo-text span { color: var(--gold); }
+  .header-badge { background: var(--gold-dim); color: var(--gold); padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; }
+
+  /* Hero */
+  .hero { text-align: center; padding: 40px 0 30px; }
+  .hero h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+  .hero h1 span { color: var(--gold); }
+  .hero p { color: var(--gray-light); font-size: 15px; max-width: 600px; margin: 0 auto; }
+
+  /* Tabs */
+  .tabs { display: flex; gap: 4px; margin-bottom: 24px; background: var(--navy-light); border-radius: 10px; padding: 4px; }
+  .tab {
+    flex: 1; padding: 12px; text-align: center; border-radius: 8px; cursor: pointer;
+    font-weight: 600; font-size: 14px; transition: all 0.2s; color: var(--gray);
+  }
+  .tab:hover { color: var(--white); background: var(--navy-mid); }
+  .tab.active { background: var(--gold); color: var(--navy); }
+
+  /* Cards */
+  .card {
+    background: var(--navy-light);
+    border: 1px solid var(--navy-mid);
+    border-radius: var(--card-radius);
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+  }
+  .card-title { font-size: 16px; font-weight: 700; margin-bottom: 16px; color: var(--gold); display: flex; align-items: center; gap: 8px; }
+  .card-title .icon { font-size: 20px; }
+
+  /* Form */
+  .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group label { font-size: 13px; font-weight: 600; color: var(--gray-light); text-transform: uppercase; letter-spacing: 0.5px; }
+  .form-group input, .form-group select {
+    background: var(--navy); border: 1px solid var(--navy-mid); border-radius: 8px;
+    padding: 12px 14px; color: var(--white); font-size: 15px; transition: border 0.2s;
+  }
+  .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--gold); }
+  .form-group input::placeholder { color: var(--gray); }
+  .form-group select option { background: var(--navy); }
+
+  /* Results */
+  .results { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-top: 20px; }
+  .result-card {
+    background: var(--navy); border-radius: 10px; padding: 16px; text-align: center;
+    border: 1px solid var(--navy-mid);
+  }
+  .result-card .value { font-size: 28px; font-weight: 700; color: var(--gold); margin: 4px 0; }
+  .result-card .label { font-size: 12px; color: var(--gray); text-transform: uppercase; letter-spacing: 0.5px; }
+  .result-card .sub { font-size: 11px; color: var(--gray); margin-top: 2px; }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 14px 28px; border-radius: 8px; font-size: 15px; font-weight: 700;
+    cursor: pointer; border: none; transition: all 0.2s;
+  }
+  .btn-primary { background: var(--gold); color: var(--navy); }
+  .btn-primary:hover { background: var(--gold-light); transform: translateY(-1px); }
+  .btn-outline { background: transparent; border: 2px solid var(--gold); color: var(--gold); }
+  .btn-outline:hover { background: var(--gold-dim); }
+  .btn-group { display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap; }
+
+  /* Portfolio Risk */
+  .portfolio-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 768px) { .portfolio-grid { grid-template-columns: 1fr; } }
+  .holdings-table { width: 100%; border-collapse: collapse; }
+  .holdings-table th { text-align: left; padding: 10px 8px; font-size: 12px; color: var(--gray); text-transform: uppercase; border-bottom: 1px solid var(--navy-mid); }
+  .holdings-table td { padding: 10px 8px; font-size: 14px; border-bottom: 1px solid rgba(45,51,82,0.5); }
+  .holdings-table input {
+    background: var(--navy); border: 1px solid var(--navy-mid); border-radius: 6px;
+    padding: 8px 10px; color: var(--white); font-size: 14px; width: 100%;
+  }
+  .holdings-table input:focus { outline: none; border-color: var(--gold); }
+
+  /* Risk bar */
+  .risk-bar-container { margin-top: 16px; }
+  .risk-bar-label { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px; }
+  .risk-bar { height: 24px; background: var(--navy); border-radius: 12px; overflow: hidden; display: flex; }
+  .risk-segment { height: 100%; transition: width 0.3s; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; color: var(--navy); min-width: 30px; }
+
+  /* CTA */
+  .cta-section {
+    background: linear-gradient(135deg, var(--navy-mid) 0%, var(--navy-light) 100%);
+    border: 2px solid var(--gold);
+    border-radius: var(--card-radius);
+    padding: 30px;
+    text-align: center;
+    margin-top: 30px;
+  }
+  .cta-section h2 { font-size: 22px; margin-bottom: 8px; }
+  .cta-section h2 span { color: var(--gold); }
+  .cta-section p { color: var(--gray-light); margin-bottom: 20px; font-size: 14px; }
+  .cta-products { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-top: 20px; }
+  .cta-product {
+    background: var(--navy); border-radius: 10px; padding: 20px; border: 1px solid var(--navy-mid);
+    transition: border-color 0.2s;
+  }
+  .cta-product:hover { border-color: var(--gold); }
+  .cta-product h3 { font-size: 15px; margin-bottom: 6px; color: var(--gold); }
+  .cta-product p { font-size: 13px; color: var(--gray-light); margin-bottom: 12px; }
+  .cta-product .price { font-size: 18px; font-weight: 700; color: var(--white); }
+  .cta-product .price small { font-size: 12px; color: var(--gray); }
+
+  /* Footer */
+  footer { text-align: center; padding: 30px 0; color: var(--gray); font-size: 13px; border-top: 1px solid var(--navy-mid); margin-top: 40px; }
+  footer a { color: var(--gold); text-decoration: none; }
+
+  /* Tooltip */
+  .tooltip { position: relative; display: inline-block; cursor: help; }
+  .tooltip .tip-text {
+    visibility: hidden; background: var(--navy-mid); color: var(--white);
+    padding: 8px 12px; border-radius: 6px; font-size: 12px; position: absolute;
+    bottom: 125%; left: 50%; transform: translateX(-50%); white-space: nowrap;
+    z-index: 10; box-shadow: var(--shadow);
+  }
+  .tooltip:hover .tip-text { visibility: visible; }
+
+  /* Animations */
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  .fade-in { animation: fadeIn 0.3s ease; }
+
+  .hidden { display: none; }
+
+  /* Add row button */
+  .add-row-btn { background: transparent; border: 1px dashed var(--navy-mid); color: var(--gray); padding: 10px; width: 100%; border-radius: 8px; cursor: pointer; font-size: 14px; margin-top: 8px; }
+  .add-row-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+  /* Remove button */
+  .remove-btn { background: transparent; border: none; color: var(--red); cursor: pointer; font-size: 18px; padding: 4px 8px; border-radius: 4px; }
+  .remove-btn:hover { background: rgba(231,76,60,0.1); }
+
+  /* Summary */
+  .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+  .summary-item { text-align: center; padding: 12px; background: var(--navy); border-radius: 8px; }
+  .summary-item .val { font-size: 22px; font-weight: 700; }
+  .summary-item .lbl { font-size: 11px; color: var(--gray); text-transform: uppercase; margin-top: 2px; }
+  .val-green { color: var(--green); }
+  .val-red { color: var(--red); }
+  .val-gold { color: var(--gold); }
+  .val-blue { color: var(--blue); }
+
+  /* Market type selector */
+  .market-tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+  .market-tab { padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; background: var(--navy); border: 1px solid var(--navy-mid); color: var(--gray); }
+  .market-tab:hover { border-color: var(--gold); color: var(--white); }
+  .market-tab.active { background: var(--gold); color: var(--navy); border-color: var(--gold); }
+
+  /* Info callout */
+  .info-callout { background: var(--gold-dim); border-left: 3px solid var(--gold); padding: 14px 16px; border-radius: 0 8px 8px 0; margin-top: 16px; font-size: 13px; color: var(--gold-light); }
+  .info-callout strong { color: var(--gold); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container header-inner">
+    <div class="logo">
+      <div class="logo-icon">&#x1F4C8;</div>
+      <div class="logo-text">Position<span>Size</span></div>
+    </div>
+    <div class="header-badge">&#x2728; 100% Free — No Sign-up Required</div>
+  </div>
+</header>
+
+<div class="container">
+  <div class="hero">
+    <h1>Position Size Calculator &amp; <span>Risk Dashboard</span></h1>
+    <p>Calculate optimal position size, visualize portfolio risk, and protect your capital — all in your browser. Built by traders, for traders.</p>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" data-tab="calculator" onclick="switchTab('calculator')">&#x1F9EE; Position Calculator</div>
+    <div class="tab" data-tab="portfolio" onclick="switchTab('portfolio')">&#x1F4CA; Portfolio Risk</div>
+    <div class="tab" data-tab="guide" onclick="switchTab('guide')">&#x1F4D6; Risk Guide</div>
+  </div>
+
+  <!-- TAB 1: Position Size Calculator -->
+  <div id="tab-calculator" class="tab-content">
+    <div class="card">
+      <div class="card-title"><span class="icon">&#x1F3AF;</span> Position Size Calculator</div>
+
+      <div class="market-tabs">
+        <div class="market-tab active" data-market="stocks" onclick="switchMarket('stocks')">&#x1F4C8; Stocks</div>
+        <div class="market-tab" data-market="forex" onclick="switchMarket('forex')">&#x1F4B1; Forex</div>
+        <div class="market-tab" data-market="crypto" onclick="switchMarket('crypto')">&#x20BF; Crypto</div>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Account Size ($)</label>
+          <input type="number" id="accountSize" placeholder="10000" value="10000">
+        </div>
+        <div class="form-group">
+          <label>Risk Per Trade (%)
+            <span class="tooltip">?<span class="tip-text">Standard risk: 1-2% of account per trade</span></span>
+          </label>
+          <input type="number" id="riskPercent" placeholder="1" value="1" step="0.1" min="0.1" max="10">
+        </div>
+        <div class="form-group">
+          <label>Entry Price ($)</label>
+          <input type="number" id="entryPrice" placeholder="150.00" step="0.01">
+        </div>
+        <div class="form-group">
+          <label>Stop Loss ($)</label>
+          <input type="number" id="stopLoss" placeholder="145.00" step="0.01">
+        </div>
+        <div class="form-group" id="targetPriceGroup">
+          <label>Target Price ($) <span style="color:var(--gray)">(optional)</span></label>
+          <input type="number" id="targetPrice" placeholder="165.00" step="0.01">
+        </div>
+      </div>
+
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="calculate()">&#x1F5A9; Calculate Position Size</button>
+        <button class="btn btn-outline" onclick="resetForm()">&#x21BA; Reset</button>
+      </div>
+
+      <div id="results" class="results hidden fade-in">
+        <div class="result-card">
+          <div class="label">Position Size</div>
+          <div class="value" id="resShares">—</div>
+          <div class="sub" id="resSharesSub"></div>
+        </div>
+        <div class="result-card">
+          <div class="label">Dollar Risk</div>
+          <div class="value" id="resRisk">—</div>
+          <div class="sub" id="resRiskSub"></div>
+        </div>
+        <div class="result-card">
+          <div class="label">Total Position Value</div>
+          <div class="value" id="resTotal">—</div>
+          <div class="sub" id="resTotalSub"></div>
+        </div>
+        <div class="result-card">
+          <div class="label">Risk/Reward Ratio</div>
+          <div class="value" id="resRR">—</div>
+          <div class="sub" id="resRRSub"></div>
+        </div>
+        <div class="result-card">
+          <div class="label">Account at Risk</div>
+          <div class="value" id="resPct">—</div>
+          <div class="sub">of total account</div>
+        </div>
+        <div class="result-card">
+          <div class="label">Potential Profit</div>
+          <div class="value" id="resProfit">—</div>
+          <div class="sub" id="resProfitSub"></div>
+        </div>
+      </div>
+
+      <div class="info-callout" id="calcTip">
+        <strong>&#x1F4A1; Pro Tip:</strong> Never risk more than 1-2% of your account on a single trade. Professional traders size positions based on stop distance, not gut feeling.
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 2: Portfolio Risk Dashboard -->
+  <div id="tab-portfolio" class="tab-content hidden">
+    <div class="card">
+      <div class="card-title"><span class="icon">&#x1F4CA;</span> Portfolio Risk Dashboard</div>
+      <p style="color:var(--gray-light);font-size:13px;margin-bottom:16px;">Add your positions to see risk allocation, concentration, and portfolio-level exposure.</p>
+
+      <table class="holdings-table" id="holdingsTable">
+        <thead>
+          <tr>
+            <th style="width:20%">Ticker</th>
+            <th style="width:15%">Shares</th>
+            <th style="width:15%">Entry ($)</th>
+            <th style="width:15%">Stop ($)</th>
+            <th style="width:15%">Risk ($)</th>
+            <th style="width:10%"></th>
+          </tr>
+        </thead>
+        <tbody id="holdingsBody">
+          <tr>
+            <td><input type="text" placeholder="AAPL" class="h-ticker"></td>
+            <td><input type="number" placeholder="100" class="h-shares"></td>
+            <td><input type="number" placeholder="150.00" step="0.01" class="h-entry"></td>
+            <td><input type="number" placeholder="145.00" step="0.01" class="h-stop"></td>
+            <td class="h-risk" style="color:var(--gray)">—</td>
+            <td><button class="remove-btn" onclick="removeRow(this)" title="Remove">&times;</button></td>
+          </tr>
+        </tbody>
+      </table>
+      <button class="add-row-btn" onclick="addRow()">+ Add Position</button>
+
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="analyzePortfolio()">&#x1F50D; Analyze Portfolio Risk</button>
+      </div>
+    </div>
+
+    <div id="portfolioResults" class="hidden fade-in">
+      <div class="card">
+        <div class="card-title"><span class="icon">&#x1F525;</span> Risk Summary</div>
+        <div class="summary-grid" id="summaryGrid"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="icon">&#x1F4C9;</span> Risk Allocation</div>
+        <div class="risk-bar-container">
+          <div class="risk-bar-label">
+            <span style="color:var(--green)">Low Risk</span>
+            <span style="color:var(--orange)">Medium</span>
+            <span style="color:var(--red)">High Risk</span>
+          </div>
+          <div class="risk-bar" id="riskBar"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="icon">&#x26A0;</span> Risk Alerts</div>
+        <div id="riskAlerts" style="font-size:14px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 3: Risk Guide -->
+  <div id="tab-guide" class="tab-content hidden">
+    <div class="card">
+      <div class="card-title"><span class="icon">&#x1F4D6;</span> Position Sizing: The Trader's Edge</div>
+      <p style="color:var(--gray-light);margin-bottom:16px;">Most traders focus on entry and exit. But position sizing is the single most important factor in long-term profitability.</p>
+
+      <div style="margin-bottom:20px;">
+        <h3 style="color:var(--gold);margin-bottom:8px;font-size:16px;">The 1% Rule</h3>
+        <p style="color:var(--gray-light);font-size:14px;">Never risk more than 1-2% of your total account on a single trade. If you have a $10,000 account, your maximum loss per trade should be $100-$200. This means if your stop loss is hit, you only lose 1-2% of your capital.</p>
+      </div>
+
+      <div style="margin-bottom:20px;">
+        <h3 style="color:var(--gold);margin-bottom:8px;font-size:16px;">The Formula</h3>
+        <div style="background:var(--navy);padding:16px;border-radius:8px;font-family:monospace;font-size:15px;color:var(--gold);margin-bottom:8px;">
+          Position Size = (Account &times; Risk%) / (Entry Price - Stop Loss)
+        </div>
+        <p style="color:var(--gray-light);font-size:14px;">Example: $10,000 account, 1% risk, entry at $150, stop at $145.<br>Position Size = ($10,000 &times; 0.01) / ($150 - $145) = $100 / $5 = <strong style="color:var(--white)">20 shares</strong></p>
+      </div>
+
+      <div style="margin-bottom:20px;">
+        <h3 style="color:var(--gold);margin-bottom:8px;font-size:16px;">Why This Matters</h3>
+        <ul style="color:var(--gray-light);font-size:14px;padding-left:20px;">
+          <li>With 1% risk, you can survive 20 consecutive losses and still have 82% of your account</li>
+          <li>With 5% risk, 10 consecutive losses leaves you with only 60% of your account</li>
+          <li>Position sizing removes emotion — you know exactly how much you can lose before entering</li>
+          <li>It forces you to place stops where the thesis is wrong, not where you "feel comfortable"</li>
+        </ul>
+      </div>
+
+      <div style="margin-bottom:20px;">
+        <h3 style="color:var(--gold);margin-bottom:8px;font-size:16px;">The Risk/Reward Filter</h3>
+        <p style="color:var(--gray-light);font-size:14px;">Only take trades with a minimum 1:2 risk/reward ratio. If you risk $100, your target should be at least $200 in potential profit. This means you can be wrong 60% of the time and still be profitable.</p>
+      </div>
+
+      <div class="info-callout">
+        <strong>&#x1F4DA; Want to go deeper?</strong> Our <a href="https://zicheng48.gumroad.com/l/fupoi" target="_blank" style="color:var(--gold);">Pro Trading Journal</a> tracks position sizing, R-multiples, and win rate by strategy automatically. Plus our <a href="https://zicheng48.gumroad.com/l/python-trading-toolkit" target="_blank" style="color:var(--gold);">Python Trading Toolkit</a> includes a position sizing module for algorithmic traders.
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA Section -->
+  <div class="cta-section">
+    <h2>Take Your Trading to the <span>Next Level</span></h2>
+    <p>Free tools get you started. These professional tools give you the edge.</p>
+    <div class="cta-products">
+      <div class="cta-product">
+        <h3>&#x1F4CA; Pro Trading Journal</h3>
+        <p>Google Sheets template with 50+ auto-calculating metrics: win rate, profit factor, R-multiple, drawdown, and more.</p>
+        <div class="price">$29 <small>HKD</small></div>
+        <a href="https://zicheng48.gumroad.com/l/fupoi" target="_blank" class="btn btn-outline" style="margin-top:12px;display:inline-flex;text-decoration:none;">Get Template &#x2192;</a>
+      </div>
+      <div class="cta-product">
+        <h3>&#x1F916; Trading AI Prompts</h3>
+        <p>40 expert prompts for market research, technical analysis, risk management, and journal analysis. Works with ChatGPT &amp; Claude.</p>
+        <div class="price">$29 <small>HKD</small></div>
+        <a href="https://zicheng48.gumroad.com/l/zjpnro" target="_blank" class="btn btn-outline" style="margin-top:12px;display:inline-flex;text-decoration:none;">Get Prompts &#x2192;</a>
+      </div>
+      <div class="cta-product">
+        <h3>&#x1F6E0; Python Trading Toolkit</h3>
+        <p>Self-hosted Python scripts for backtesting, technical analysis, portfolio optimization, and position sizing. Zero dependencies.</p>
+        <div class="price">$49 <small>HKD</small></div>
+        <a href="https://zicheng48.gumroad.com/l/python-trading-toolkit" target="_blank" class="btn btn-outline" style="margin-top:12px;display:inline-flex;text-decoration:none;">Get Toolkit &#x2192;</a>
+      </div>
+      <div class="cta-product">
+        <h3>&#x1F4C9; Quantitative Analysis Toolkit</h3>
+        <p>Factor analysis, portfolio optimization, correlation matrices, and risk analytics in pure Python. For serious quants.</p>
+        <div class="price">$59 <small>HKD</small></div>
+        <a href="https://zicheng48.gumroad.com/l/quantitative-toolkit" target="_blank" class="btn btn-outline" style="margin-top:12px;display:inline-flex;text-decoration:none;">Get Toolkit &#x2192;</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="container">
+    <p>Built by a professional trader. Free forever. No data collected. No sign-up required.</p>
+    <p style="margin-top:8px;">&#x1F517; Also check out our <a href="https://zicheng48.gumroad.com" target="_blank">Gumroad store</a> for professional trading tools</p>
+  </div>
+</footer>
+
+<script>
+// Tab switching
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelector(`.tab[data-tab="${tab}"]`).classList.add('active');
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+  document.getElementById(`tab-${tab}`).classList.remove('hidden');
+}
+
+// Market type switching
+let currentMarket = 'stocks';
+function switchMarket(market) {
+  currentMarket = market;
+  document.querySelectorAll('.market-tab').forEach(t => t.classList.remove('active'));
+  document.querySelector(`.market-tab[data-market="${market}"]`).classList.add('active');
+  const tip = document.getElementById('calcTip');
+  if (market === 'stocks') {
+    tip.innerHTML = '<strong>&#x1F4A1; Pro Tip:</strong> Never risk more than 1-2% of your account on a single trade. Professional traders size positions based on stop distance, not gut feeling.';
+  } else if (market === 'forex') {
+    tip.innerHTML = '<strong>&#x1F4A1; Forex Tip:</strong> Pip value varies by pair. For USD-quote pairs (EUR/USD), 1 pip = $0.10 per micro lot, $1 per mini lot, $10 per standard lot.';
+  } else {
+    tip.innerHTML = '<strong>&#x1F4A1; Crypto Tip:</strong> Crypto volatility is 3-5x stocks. Consider reducing your risk to 0.5-1% per trade and using wider stops.';
+  }
+}
+
+// Position Size Calculator
+function calculate() {
+  const account = parseFloat(document.getElementById('accountSize').value);
+  const risk = parseFloat(document.getElementById('riskPercent').value);
+  const entry = parseFloat(document.getElementById('entryPrice').value);
+  const stop = parseFloat(document.getElementById('stopLoss').value);
+  const target = parseFloat(document.getElementById('targetPrice').value);
+
+  if (!account || !risk || !entry || !stop) {
+    alert('Please fill in Account Size, Risk %, Entry Price, and Stop Loss.');
+    return;
+  }
+
+  const dollarRisk = account * (risk / 100);
+  const stopDistance = Math.abs(entry - stop);
+  let shares, totalValue, rr, potentialProfit;
+
+  if (currentMarket === 'stocks') {
+    shares = Math.floor(dollarRisk / stopDistance);
+    totalValue = shares * entry;
+    rr = target ? ((target - entry) / stopDistance).toFixed(1) : 'N/A';
+    potentialProfit = target ? (shares * (target - entry)) : 'N/A';
+    document.getElementById('resShares').textContent = shares.toLocaleString();
+    document.getElementById('resSharesSub').textContent = 'shares';
+    document.getElementById('resTotalSub').textContent = `at $${entry.toFixed(2)}/share`;
+  } else if (currentMarket === 'forex') {
+    const pipValue = 10; // per standard lot for USD-quote pairs
+    const pipsAtRisk = stopDistance * 10000; // approximate pips
+    const lots = dollarRisk / (pipsAtRisk * pipValue);
+    shares = lots;
+    totalValue = lots * 100000; // standard lot = 100k units
+    rr = target ? ((target - entry) / stopDistance).toFixed(1) : 'N/A';
+    potentialProfit = target ? (lots * (target - entry) * 100000) : 'N/A';
+    document.getElementById('resShares').textContent = lots.toFixed(2);
+    document.getElementById('resSharesSub').textContent = 'standard lots';
+    document.getElementById('resTotalSub').textContent = `${(lots * 100000).toLocaleString()} units`;
+  } else {
+    shares = dollarRisk / stopDistance;
+    totalValue = shares * entry;
+    rr = target ? ((target - entry) / stopDistance).toFixed(1) : 'N/A';
+    potentialProfit = target ? (shares * (target - entry)) : 'N/A';
+    document.getElementById('resShares').textContent = shares.toFixed(4);
+    document.getElementById('resSharesSub').textContent = 'coins';
+    document.getElementById('resTotalSub').textContent = `at $${entry.toFixed(2)}/coin`;
+  }
+
+  document.getElementById('resRisk').textContent = '$' + dollarRisk.toFixed(2);
+  document.getElementById('resRiskSub').textContent = `${risk}% of $${account.toLocaleString()}`;
+  document.getElementById('resTotal').textContent = '$' + totalValue.toLocaleString(undefined, {maximumFractionDigits: 2});
+  document.getElementById('resRR').textContent = rr;
+  document.getElementById('resRRSub').textContent = rr !== 'N/A' ? (parseFloat(rr) >= 2 ? '&#x2705; Good R:R' : '&#x26A0; Below 1:2') : 'Set a target';
+  document.getElementById('resPct').textContent = risk + '%';
+  document.getElementById('resProfit').textContent = typeof potentialProfit === 'number' ? '$' + potentialProfit.toFixed(2) : '—';
+  document.getElementById('resProfitSub').textContent = typeof potentialProfit === 'number' ? `at $${target?.toFixed(2)}` : 'Set a target';
+
+  document.getElementById('results').classList.remove('hidden');
+}
+
+function resetForm() {
+  document.getElementById('accountSize').value = 10000;
+  document.getElementById('riskPercent').value = 1;
+  document.getElementById('entryPrice').value = '';
+  document.getElementById('stopLoss').value = '';
+  document.getElementById('targetPrice').value = '';
+  document.getElementById('results').classList.add('hidden');
+}
+
+// Portfolio Risk Analysis
+function addRow() {
+  const tbody = document.getElementById('holdingsBody');
+  const row = document.createElement('tr');
+  row.innerHTML = `
+    <td><input type="text" placeholder="TSLA" class="h-ticker"></td>
+    <td><input type="number" placeholder="50" class="h-shares"></td>
+    <td><input type="number" placeholder="200.00" step="0.01" class="h-entry"></td>
+    <td><input type="number" placeholder="190.00" step="0.01" class="h-stop"></td>
+    <td class="h-risk" style="color:var(--gray)">—</td>
+    <td><button class="remove-btn" onclick="removeRow(this)" title="Remove">&times;</button></td>
+  `;
+  tbody.appendChild(row);
+}
+
+function removeRow(btn) {
+  const tbody = document.getElementById('holdingsBody');
+  if (tbody.rows.length > 1) {
+    btn.closest('tr').remove();
+  }
+}
+
+function analyzePortfolio() {
+  const rows = document.getElementById('holdingsBody').querySelectorAll('tr');
+  let positions = [];
+  let totalRisk = 0;
+  let totalValue = 0;
+
+  rows.forEach(row => {
+    const ticker = row.querySelector('.h-ticker').value.trim();
+    const shares = parseFloat(row.querySelector('.h-shares').value);
+    const entry = parseFloat(row.querySelector('.h-entry').value);
+    const stop = parseFloat(row.querySelector('.h-stop').value);
+
+    if (ticker && shares && entry && stop) {
+      const risk = shares * Math.abs(entry - stop);
+      const value = shares * entry;
+      positions.push({ ticker, shares, entry, stop, risk, value });
+      totalRisk += risk;
+      totalValue += value;
+      row.querySelector('.h-risk').textContent = '$' + risk.toFixed(2);
+      row.querySelector('.h-risk').style.color = 'var(--red)';
+    }
+  });
+
+  if (positions.length === 0) {
+    alert('Please fill in at least one position with ticker, shares, entry, and stop.');
+    return;
+  }
+
+  const avgRisk = totalRisk / positions.length;
+  const maxRiskPos = positions.reduce((max, p) => p.risk > max.risk ? p : max, positions[0]);
+  const concentration = (maxRiskPos.risk / totalRisk * 100).toFixed(1);
+
+  // Summary
+  const summaryGrid = document.getElementById('summaryGrid');
+  summaryGrid.innerHTML = `
+    <div class="summary-item"><div class="val val-blue">${positions.length}</div><div class="lbl">Positions</div></div>
+    <div class="summary-item"><div class="val val-gold">$${totalValue.toLocaleString(undefined, {maximumFractionDigits:0})}</div><div class="lbl">Total Value</div></div>
+    <div class="summary-item"><div class="val val-red">$${totalRisk.toFixed(2)}</div><div class="lbl">Total Risk</div></div>
+    <div class="summary-item"><div class="val ${(totalRisk/totalValue*100) > 5 ? 'val-red' : 'val-green'}">${(totalRisk/totalValue*100).toFixed(1)}%</div><div class="lbl">Risk/Portfolio</div></div>
+    <div class="summary-item"><div class="val val-gold">$${avgRisk.toFixed(2)}</div><div class="lbl">Avg Risk/Pos</div></div>
+    <div class="summary-item"><div class="val ${concentration > 30 ? 'val-red' : 'val-green'}">${maxRiskPos.ticker}</div><div class="lbl">Highest Risk (${concentration}%)</div></div>
+  `;
+
+  // Risk bar
+  const riskBar = document.getElementById('riskBar');
+  riskBar.innerHTML = '';
+  positions.forEach(p => {
+    const pct = (p.risk / totalRisk * 100);
+    const color = pct > 30 ? 'var(--red)' : pct > 15 ? 'var(--orange)' : 'var(--green)';
+    const seg = document.createElement('div');
+    seg.className = 'risk-segment';
+    seg.style.width = Math.max(pct, 5) + '%';
+    seg.style.background = color;
+    seg.textContent = p.ticker;
+    seg.title = `${p.ticker}: $${p.risk.toFixed(2)} risk (${pct.toFixed(1)}%)`;
+    riskBar.appendChild(seg);
+  });
+
+  // Alerts
+  const alerts = document.getElementById('riskAlerts');
+  let alertHTML = '';
+  if (totalRisk / totalValue > 0.05) {
+    alertHTML += `<div style="color:var(--red);margin-bottom:8px;">&#x26A0; <strong>High Portfolio Risk:</strong> Total risk (${(totalRisk/totalValue*100).toFixed(1)}%) exceeds 5% of portfolio value. Consider reducing position sizes.</div>`;
+  }
+  if (concentration > 30) {
+    alertHTML += `<div style="color:var(--orange);margin-bottom:8px;">&#x1F536; <strong>Concentration Risk:</strong> ${maxRiskPos.ticker} accounts for ${concentration}% of total portfolio risk. Consider diversifying.</div>`;
+  }
+  if (positions.length > 10) {
+    alertHTML += `<div style="color:var(--orange);margin-bottom:8px;">&#x1F4CA; <strong>Over-diversified:</strong> ${positions.length} positions may be hard to monitor effectively. Consider focusing on your highest-conviction trades.</div>`;
+  }
+  if (positions.length <= 3) {
+    alertHTML += `<div style="color:var(--green);margin-bottom:8px;">&#x2705; <strong>Concentrated Portfolio:</strong> ${positions.length} positions. Good for focused management, but ensure stops are well-placed.</div>`;
+  }
+  const rrOK = positions.filter(p => {
+    const target = p.entry + (p.entry - p.stop) * 2;
+    return target > 0;
+  });
+  alertHTML += `<div style="color:var(--blue);">&#x1F4A1; <strong>Recommendation:</strong> For each position, set a target price at least 2x your stop distance for a 1:2 risk/reward ratio.</div>`;
+  alerts.innerHTML = alertHTML;
+
+  document.getElementById('portfolioResults').classList.remove('hidden');
+}
+
+// Auto-calculate on Enter key
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && !document.getElementById('tab-calculator').classList.contains('hidden')) {
+    calculate();
+  }
+});
+</script>
+</body>
+</html>
